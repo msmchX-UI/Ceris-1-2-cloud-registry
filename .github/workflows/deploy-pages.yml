@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - copilot/ceris-1-2-registry-website
   workflow_dispatch:
 
 permissions:
