@@ -8,15 +8,17 @@ A unified cloud registry for discovering, publishing, and managing container ima
 
 ### One-time setup to make the site live
 
-1. **Merge this PR** into `main` so the website files and workflow reach the default branch.
-2. **Approve the pending workflow run** (if prompted):  
-   Go to **Actions → Deploy to GitHub Pages** and click **"Approve and run"** if it shows `action_required`.
-3. **Enable GitHub Pages** in repository settings:  
-   Go to **Settings → Pages → Source** and set it to **"Deploy from a branch"** → branch: **`gh-pages`** → folder: **`/ (root)`** → Save.
-4. The site will be live at `https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/` within a minute.
+Two steps are all that is needed:
 
-> **Why `gh-pages` branch?**  
-> The deploy workflow (`peaceiris/actions-gh-pages@v4`) automatically pushes the built site to the `gh-pages` branch on every push to `main`. This avoids the GitHub Pages environment-approval gate that blocked the previous `actions/deploy-pages` approach.
+1. **Merge this PR** into `main` so the website files reach the default branch.
+
+2. **Enable GitHub Pages** from the repository's Settings:
+   - Go to **Settings → Pages**
+   - Under **Source**, select **"Deploy from a branch"**
+   - Set branch to **`main`** and folder to **`/ (root)`**
+   - Click **Save**
+
+The site will be live at **https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/** within a minute. Every subsequent push to `main` will automatically re-deploy the site.
 
 ## Local preview
 
@@ -34,7 +36,7 @@ npx serve .
 | `index.html` | Main registry website (single-page) |
 | `styles.css` | All styling – responsive, CSS-variable–driven |
 | `app.js` | Package data, search, filter, and detail logic |
-| `.github/workflows/deploy-pages.yml` | Auto-deploys to GitHub Pages on every push to `main` |
+| `.nojekyll` | Prevents GitHub Pages from running Jekyll |
 
 ## Features
 
