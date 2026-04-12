@@ -3,61 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Admin</title>
+    <script>
+        function logout() {
+            localStorage.removeItem('ceris_admin_logged_in_user_v1');
+            window.location.href = '/Ceris-1-2-cloud-registry/';
+        }
+    </script>
 </head>
 <body>
-    <div id="login-form" style="display: none;">
-        <h2>Login</h2>
-        <form id="admin-login">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">Login</button>
-        </form>
-    </div>
-
-    <div id="admin-content" style="display: none;">
-        <h2>Admin Content</h2>
-        <p>Welcome to the admin panel!</p>
-        <button id="logout-btn">Logout</button>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const loginForm = document.getElementById('login-form');
-            const adminContent = document.getElementById('admin-content');
-            const logoutBtn = document.getElementById('logout-btn');
-
-            // Check if user is logged in
-            const loggedInUser = localStorage.getItem('ceris_admin_logged_in_user_v1');
-            if (loggedInUser) {
-                adminContent.style.display = 'block';
-                loginForm.style.display = 'none';
-                // You might want to set some welcome message here based on loggedInUser
-            } else {
-                loginForm.style.display = 'block';
-                adminContent.style.display = 'none';
-            }
-
-            // Handle login form submission
-            document.getElementById('admin-login').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const username = document.getElementById('username').value;
-                // Perform authentication here (omitted for simplicity)
-                // On successful login:
-                localStorage.setItem('ceris_admin_logged_in_user_v1', username);
-                loginForm.style.display = 'none';
-                adminContent.style.display = 'block';
-            });
-
-            // Handle logout
-            logoutBtn.addEventListener('click', function () {
-                localStorage.removeItem('ceris_admin_logged_in_user_v1');
-                loginForm.style.display = 'block';
-                adminContent.style.display = 'none';
-            });
-        });
-    </script>
+    <button onclick="logout()">Logout</button>
+    <!-- Other content of admin/index.html -->
 </body>
 </html>
