@@ -1,5 +1,174 @@
-<div class="actions">
-    <a href="/Ceris-1-2-cloud-registry/view-repo" class="btn btn-primary">View repo</a>
-    <a href="/Ceris-1-2-cloud-registry/user/" class="btn btn-secondary">User Access</a>
-    <a href="/Ceris-1-2-cloud-registry/admin/" class="btn btn-secondary">Admin Access</a>
-</div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ceris 1-2 Cloud Registry</title>
+    <meta name="description" content="Ceris 1-2 Cloud Registry" />
+
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121a33;
+        --text: #e7ecff;
+        --muted: #aab4e6;
+        --accent: #7aa2ff;
+        --border: rgba(255, 255, 255, 0.12);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+          "Apple Color Emoji","Segoe UI Emoji";
+        background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,.25), transparent 55%),
+                    radial-gradient(900px 500px at 80% 20%, rgba(122,255,205,.14), transparent 60%),
+                    var(--bg);
+        color: var(--text);
+      }
+      header {
+        padding: 48px 20px 20px;
+        max-width: 980px;
+        margin: 0 auto;
+      }
+      .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: .3px;
+      }
+      h1 {
+        margin: 14px 0 8px;
+        font-size: 36px;
+        line-height: 1.15;
+      }
+      p.lead {
+        margin: 0;
+        color: var(--muted);
+        max-width: 70ch;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .card {
+        background: rgba(18, 26, 51, 0.9);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        backdrop-filter: blur(6px);
+      }
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      a.button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+        font-size: 14px;
+      }
+      a.button.primary {
+        background: rgba(122, 162, 255, 0.18);
+        border-color: rgba(122, 162, 255, 0.35);
+      }
+      a.button:hover { border-color: rgba(255,255,255,0.22); }
+      footer {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 20px 40px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        padding: 2px 6px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: rgba(0,0,0,0.2);
+        color: var(--text);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <span class="badge">GitHub Pages • Ceris-1-2-cloud-registry</span>
+      <h1>Ceris 1-2 Cloud Registry</h1>
+      <p class="lead">
+        This site is being served by GitHub Pages. Add links and content here, or replace this
+        file with your generated site (React/Vite, Vue, Svelte, etc.).
+      </p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Status</h2>
+        <p>
+          If you previously saw a 404 at
+          <code>/Ceris-1-2-cloud-registry/</code>, it was because the Pages source didnt include
+          an <code>index.html</code>.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Repository</h2>
+        <p>Open the repository on GitHub.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/msmchX-UI/Ceris-1-2-cloud-registry">
+            View repo
+          </a>
+
+          <a class="button" href="/Ceris-1-2-cloud-registry/user/">
+            User Access
+          </a>
+
+          <a class="button primary" href="/Ceris-1-2-cloud-registry/admin/">
+            Admin Access
+          </a>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Next steps</h2>
+        <p>
+          Decide where your site is published from:
+          repo root (<code>/(root)</code>) or <code>/docs</code>. Then keep this file there.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div>Last updated: <span id="updated"></span></div>
+    </footer>
+
+    <script>
+      document.getElementById("updated").textContent = new Date().toISOString().slice(0, 10);
+    </script>
+  </body>
+</html>
