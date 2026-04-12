@@ -3,172 +3,603 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Ceris 1-2 Cloud Registry</title>
-    <meta name="description" content="Ceris 1-2 Cloud Registry" />
-
+    <title>Ceris-1-2 Cloud Registry</title>
+    <meta name="description" content="Discover, publish, and manage cloud packages with Ceris-1-2 Cloud Registry." />
     <style>
+      /* ── Reset & tokens ─────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
       :root {
-        --bg: #0b1020;
-        --panel: #121a33;
-        --text: #e7ecff;
-        --muted: #aab4e6;
-        --accent: #7aa2ff;
-        --border: rgba(255, 255, 255, 0.12);
+        --bg:        #0b1120;
+        --hero-from: #0d1b3e;
+        --hero-to:   #0b1120;
+        --surface:   #131f3a;
+        --border:    rgba(255,255,255,.10);
+        --text:      #e8edff;
+        --muted:     #8a9acf;
+        --accent:    #4f8ef7;
+        --accent-h:  #3a78e8;
+        --radius:    10px;
+        --ff:        ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+                     Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       }
-      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
       body {
-        margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-          "Apple Color Emoji","Segoe UI Emoji";
-        background: radial-gradient(1200px 600px at 20% 0%, rgba(122,162,255,.25), transparent 55%),
-                    radial-gradient(900px 500px at 80% 20%, rgba(122,255,205,.14), transparent 60%),
-                    var(--bg);
+        font-family: var(--ff);
+        background: var(--bg);
         color: var(--text);
+        min-height: 100vh;
       }
-      header {
-        padding: 48px 20px 20px;
-        max-width: 980px;
+
+      /* ── Nav ────────────────────────────────────────────── */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(11,17,32,.88);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-inner {
+        max-width: 1100px;
         margin: 0 auto;
-      }
-      .badge {
-        display: inline-block;
-        padding: 6px 10px;
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        color: var(--muted);
-        font-size: 12px;
-        letter-spacing: .3px;
-      }
-      h1 {
-        margin: 14px 0 8px;
-        font-size: 36px;
-        line-height: 1.15;
-      }
-      p.lead {
-        margin: 0;
-        color: var(--muted);
-        max-width: 70ch;
-        line-height: 1.6;
-      }
-      main {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 20px;
-        display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-      .card {
-        background: rgba(18, 26, 51, 0.9);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 16px;
-        backdrop-filter: blur(6px);
-      }
-      .card h2 {
-        margin: 0 0 8px;
-        font-size: 16px;
-      }
-      .card p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.6;
-        font-size: 14px;
-      }
-      .actions {
+        padding: 0 24px;
+        height: 56px;
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 12px;
-      }
-      a.button {
-        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
+        gap: 12px;
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        flex-shrink: 0;
+      }
+      .nav-brand-name {
+        font-size: 18px;
+        font-weight: 700;
         color: var(--text);
+        letter-spacing: -.3px;
+      }
+      .nav-brand-tag {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        background: rgba(79,142,247,.14);
+        border: 1px solid rgba(79,142,247,.3);
+        border-radius: 6px;
+        padding: 2px 8px;
+        white-space: nowrap;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: auto;
+        list-style: none;
+      }
+      .nav-links a {
+        color: var(--muted);
         text-decoration: none;
         font-size: 14px;
+        font-weight: 500;
+        padding: 6px 12px;
+        border-radius: var(--radius);
+        transition: color .15s, background .15s;
       }
-      a.button.primary {
-        background: rgba(122, 162, 255, 0.18);
-        border-color: rgba(122, 162, 255, 0.35);
-      }
-      a.button:hover { border-color: rgba(255,255,255,0.22); }
-      footer {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 24px 20px 40px;
-        color: var(--muted);
-        font-size: 12px;
-      }
-      code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        font-size: 12px;
-        padding: 2px 6px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: rgba(0,0,0,0.2);
+      .nav-links a:hover {
         color: var(--text);
+        background: rgba(255,255,255,.06);
+      }
+      .btn-signin {
+        margin-left: 10px;
+        padding: 7px 18px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(79,142,247,.45);
+        background: rgba(79,142,247,.15);
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .15s, border-color .15s;
+        white-space: nowrap;
+      }
+      .btn-signin:hover {
+        background: rgba(79,142,247,.28);
+        border-color: rgba(79,142,247,.7);
+      }
+      /* hamburger (mobile) */
+      .nav-toggle {
+        display: none;
+        flex-direction: column;
+        gap: 5px;
+        cursor: pointer;
+        padding: 6px;
+        border: none;
+        background: none;
+        margin-left: auto;
+      }
+      .nav-toggle span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--text);
+        transition: transform .2s, opacity .2s;
+      }
+
+      /* ── Hero ───────────────────────────────────────────── */
+      .hero {
+        background:
+          radial-gradient(ellipse 120% 80% at 50% -10%, rgba(45,100,230,.55), transparent 65%),
+          linear-gradient(180deg, var(--hero-from) 0%, var(--hero-to) 100%);
+        padding: 80px 24px 72px;
+        text-align: center;
+      }
+      .hero-title {
+        font-size: clamp(2rem, 5vw, 3.25rem);
+        font-weight: 800;
+        letter-spacing: -.5px;
+        line-height: 1.15;
+        margin-bottom: 18px;
+      }
+      .hero-title span {
+        background: linear-gradient(90deg, #7ab0ff 0%, #a5c8ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero-sub {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        color: var(--muted);
+        max-width: 600px;
+        margin: 0 auto 40px;
+        line-height: 1.7;
+      }
+
+      /* Search */
+      .search-wrap {
+        display: flex;
+        align-items: center;
+        max-width: 580px;
+        margin: 0 auto 40px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .search-wrap:focus-within {
+        border-color: rgba(79,142,247,.6);
+        box-shadow: 0 0 0 3px rgba(79,142,247,.18);
+      }
+      .search-input {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        padding: 14px 18px;
+        color: var(--text);
+        font-size: 15px;
+        font-family: var(--ff);
+      }
+      .search-input::placeholder { color: var(--muted); }
+      .btn-search {
+        padding: 10px 22px;
+        margin: 5px 6px 5px 0;
+        border-radius: 8px;
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: var(--ff);
+        cursor: pointer;
+        transition: background .15s;
+        white-space: nowrap;
+      }
+      .btn-search:hover { background: var(--accent-h); }
+
+      /* Stats */
+      .stats {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 40px;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .stat-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .stat-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--muted);
+      }
+
+      /* ── Main content ───────────────────────────────────── */
+      .content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 56px 24px 80px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .section-link {
+        font-size: 14px;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .section-link:hover { text-decoration: underline; }
+
+      /* Package grid */
+      .pkg-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 16px;
+      }
+      .pkg-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        transition: border-color .2s, transform .2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .pkg-card:hover {
+        border-color: rgba(79,142,247,.4);
+        transform: translateY(-2px);
+      }
+      .pkg-card-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .pkg-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: rgba(79,142,247,.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .pkg-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .pkg-version {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .pkg-desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 14px;
+      }
+      .pkg-meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .pkg-meta span { display: flex; align-items: center; gap: 4px; }
+
+      /* Feature cards */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+      }
+      .feature-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+      }
+      .feature-card-icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      .feature-card h3 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .feature-card p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      /* ── Footer ─────────────────────────────────────────── */
+      .footer {
+        border-top: 1px solid var(--border);
+        text-align: center;
+        padding: 28px 24px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .footer a { color: var(--muted); }
+      .footer a:hover { color: var(--text); }
+
+      /* ── Responsive ─────────────────────────────────────── */
+      @media (max-width: 640px) {
+        .nav-links, .btn-signin { display: none; }
+        .nav-toggle { display: flex; }
+        .nav-links {
+          position: absolute;
+          top: 56px;
+          left: 0;
+          right: 0;
+          background: rgba(11,17,32,.97);
+          border-bottom: 1px solid var(--border);
+          flex-direction: column;
+          align-items: stretch;
+          padding: 8px 12px 12px;
+          gap: 4px;
+        }
+        .nav-links.open { display: flex; }
+        .btn-signin.open {
+          display: block;
+          margin: 4px 12px 8px;
+        }
+        .hero { padding: 52px 20px 52px; }
+        .stats { gap: 24px; }
       }
     </style>
   </head>
 
   <body>
-    <header>
-      <span class="badge">GitHub Pages • Ceris-1-2-cloud-registry</span>
-      <h1>Ceris 1-2 Cloud Registry</h1>
-      <p class="lead">
-        This site is being served by GitHub Pages. Add links and content here, or replace this
-        file with your generated site (React/Vite, Vue, Svelte, etc.).
+
+    <!-- ── Navigation ──────────────────────────────────── -->
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+      <div class="nav-inner">
+        <a class="nav-brand" href="/Ceris-1-2-cloud-registry/">
+          <span class="nav-brand-name">Ceris-1-2</span>
+          <span class="nav-brand-tag">Cloud Registry</span>
+        </a>
+
+        <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" id="nav-toggle">
+          <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-links" id="nav-links" role="list">
+          <li><a href="#packages">Browse</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#docs">Docs</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+
+        <a class="btn-signin" href="/Ceris-1-2-cloud-registry/admin/" id="btn-signin">Sign In</a>
+      </div>
+    </nav>
+
+    <!-- ── Hero ────────────────────────────────────────── -->
+    <section class="hero" aria-label="Hero">
+      <h1 class="hero-title">
+        <span>Ceris-1-2</span> Cloud Registry
+      </h1>
+      <p class="hero-sub">
+        Discover, publish, and manage versioned cloud packages.
+        A fast, secure registry for modern infrastructure components.
       </p>
-    </header>
 
-    <main>
-      <section class="card">
-        <h2>Status</h2>
-        <p>
-          If you previously saw a 404 at
-          <code>/Ceris-1-2-cloud-registry/</code>, it was because the Pages source didnt include
-          an <code>index.html</code>.
-        </p>
-      </section>
+      <form class="search-wrap" role="search" onsubmit="handleSearch(event)">
+        <input
+          class="search-input"
+          type="search"
+          id="search-input"
+          placeholder="Search packages, publishers, keywords…"
+          aria-label="Search packages"
+          autocomplete="off"
+        />
+        <button class="btn-search" type="submit">Search</button>
+      </form>
 
-      <section class="card">
-        <h2>Repository</h2>
-        <p>Open the repository on GitHub.</p>
-        <div class="actions">
-          <a class="button primary" href="https://github.com/msmchX-UI/Ceris-1-2-cloud-registry">
-            View repo
+      <div class="stats" aria-label="Registry statistics">
+        <div class="stat">
+          <span class="stat-value">1,240</span>
+          <span class="stat-label">Packages</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">380</span>
+          <span class="stat-label">Publishers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">4.7M</span>
+          <span class="stat-label">Downloads</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Popular Packages ────────────────────────────── -->
+    <main class="content">
+      <section id="packages" aria-labelledby="popular-heading">
+        <div class="section-header">
+          <h2 class="section-title" id="popular-heading">Popular Packages</h2>
+          <a class="section-link" href="#">Browse all &rarr;</a>
+        </div>
+
+        <div class="pkg-grid">
+          <a class="pkg-card" href="#">
+            <div class="pkg-card-top">
+              <div class="pkg-icon">&#x2601;&#xFE0F;</div>
+              <div>
+                <div class="pkg-name">cloud-core</div>
+                <div class="pkg-version">v3.2.1</div>
+              </div>
+            </div>
+            <p class="pkg-desc">Core utilities and runtime helpers for cloud-native applications.</p>
+            <div class="pkg-meta">
+              <span>&#x2B07; 820K</span>
+              <span>&#x2B50; 4.9</span>
+            </div>
           </a>
 
-          <a class="button" href="/Ceris-1-2-cloud-registry/user/">
-            User Access
+          <a class="pkg-card" href="#">
+            <div class="pkg-card-top">
+              <div class="pkg-icon">&#x1F512;</div>
+              <div>
+                <div class="pkg-name">auth-shield</div>
+                <div class="pkg-version">v2.0.4</div>
+              </div>
+            </div>
+            <p class="pkg-desc">Zero-trust authentication and access control for distributed services.</p>
+            <div class="pkg-meta">
+              <span>&#x2B07; 610K</span>
+              <span>&#x2B50; 4.8</span>
+            </div>
           </a>
 
-          <a class="button primary" href="/Ceris-1-2-cloud-registry/admin/">
-            Admin Access
+          <a class="pkg-card" href="#">
+            <div class="pkg-card-top">
+              <div class="pkg-icon">&#x1F4E6;</div>
+              <div>
+                <div class="pkg-name">infra-deploy</div>
+                <div class="pkg-version">v1.8.0</div>
+              </div>
+            </div>
+            <p class="pkg-desc">Declarative infrastructure deployment toolkit for multi-cloud environments.</p>
+            <div class="pkg-meta">
+              <span>&#x2B07; 540K</span>
+              <span>&#x2B50; 4.7</span>
+            </div>
+          </a>
+
+          <a class="pkg-card" href="#">
+            <div class="pkg-card-top">
+              <div class="pkg-icon">&#x1F4CA;</div>
+              <div>
+                <div class="pkg-name">metrics-hub</div>
+                <div class="pkg-version">v4.1.2</div>
+              </div>
+            </div>
+            <p class="pkg-desc">Real-time telemetry aggregation and observability pipeline components.</p>
+            <div class="pkg-meta">
+              <span>&#x2B07; 470K</span>
+              <span>&#x2B50; 4.6</span>
+            </div>
+          </a>
+
+          <a class="pkg-card" href="#">
+            <div class="pkg-card-top">
+              <div class="pkg-icon">&#x1F504;</div>
+              <div>
+                <div class="pkg-name">sync-engine</div>
+                <div class="pkg-version">v2.5.3</div>
+              </div>
+            </div>
+            <p class="pkg-desc">High-throughput event streaming and state synchronization library.</p>
+            <div class="pkg-meta">
+              <span>&#x2B07; 395K</span>
+              <span>&#x2B50; 4.5</span>
+            </div>
+          </a>
+
+          <a class="pkg-card" href="#">
+            <div class="pkg-card-top">
+              <div class="pkg-icon">&#x1F6E1;&#xFE0F;</div>
+              <div>
+                <div class="pkg-name">vault-keys</div>
+                <div class="pkg-version">v1.3.0</div>
+              </div>
+            </div>
+            <p class="pkg-desc">Secrets management and key rotation utilities with HSM support.</p>
+            <div class="pkg-meta">
+              <span>&#x2B07; 310K</span>
+              <span>&#x2B50; 4.7</span>
+            </div>
           </a>
         </div>
       </section>
 
-      <section class="card">
-        <h2>Next steps</h2>
-        <p>
-          Decide where your site is published from:
-          repo root (<code>/(root)</code>) or <code>/docs</code>. Then keep this file there.
-        </p>
+      <!-- ── Features ──────────────────────────────────── -->
+      <section id="features" aria-labelledby="features-heading" style="margin-top:64px">
+        <div class="section-header">
+          <h2 class="section-title" id="features-heading">Why Ceris-1-2?</h2>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-card-icon">&#x26A1;</div>
+            <h3>Fast CDN delivery</h3>
+            <p>Packages are served from edge nodes globally for sub-50 ms pull times anywhere in the world.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-icon">&#x1F510;</div>
+            <h3>Signed artifacts</h3>
+            <p>Every release is cryptographically signed and verified so you can trust what you install.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-icon">&#x1F50D;</div>
+            <h3>Smart search</h3>
+            <p>Full-text and semantic search across package names, descriptions, tags, and READMEs.</p>
+          </div>
+        </div>
       </section>
     </main>
 
-    <footer>
-      <div>Last updated: <span id="updated"></span></div>
+    <!-- ── Footer ──────────────────────────────────────── -->
+    <footer class="footer">
+      <p>
+        &copy; <span id="year"></span> Ceris-1-2 Cloud Registry &nbsp;&middot;&nbsp;
+        <a href="https://github.com/msmchX-UI/Ceris-1-2-cloud-registry">GitHub</a> &nbsp;&middot;&nbsp;
+        <a href="/Ceris-1-2-cloud-registry/admin/">Admin</a>
+      </p>
     </footer>
 
     <script>
-      document.getElementById("updated").textContent = new Date().toISOString().slice(0, 10);
+      /* Year in footer */
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      /* Mobile nav toggle */
+      const toggle = document.getElementById('nav-toggle');
+      const navLinks = document.getElementById('nav-links');
+      const btnSignin = document.getElementById('btn-signin');
+      toggle.addEventListener('click', () => {
+        const open = navLinks.classList.toggle('open');
+        btnSignin.classList.toggle('open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+      });
+
+      /* Search handler (placeholder) */
+      function handleSearch(e) {
+        e.preventDefault();
+        const q = document.getElementById('search-input').value.trim();
+        if (q) {
+          document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     </script>
   </body>
 </html>

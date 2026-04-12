@@ -1,33 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Ceris-1-2</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
+      --accent: #6366f1; --accent-hover: #4f52d0;
+      --text: #e2e8f0; --muted: #64748b;
+      --error: #f87171; --success: #34d399;
+    }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── Login ── */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center; min-height: 100vh;
+    }
+    .login-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 40px 36px; width: 100%; max-width: 380px;
+    }
+    .login-card h1 { font-size: 20px; margin-bottom: 4px; }
+    .login-card p.sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+    .fg { margin-bottom: 16px; }
+    .fg label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+    .fg input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 9px 12px; color: var(--text); font-size: 14px; outline: none;
+    }
+    .fg input:focus { border-color: var(--accent); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 9px 18px; border-radius: 6px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; transition: background .15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-full { width: 100%; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-danger { background: #3b1f1f; color: var(--error); }
+    .btn-danger:hover { background: #5a2121; }
+    .err-msg { color: var(--error); font-size: 13px; margin-bottom: 12px; min-height: 18px; }
+
+    /* ── Dashboard ── */
+    #dashboard { display: none; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .topbar-brand { font-weight: 700; font-size: 16px; }
+    .topbar-brand span { color: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+    .badge { background: var(--accent); color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
+    .main-content { max-width: 860px; margin: 0 auto; padding: 36px 20px; }
+    .section-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 24px; margin-bottom: 28px;
+    }
+    .section-card h2 { font-size: 15px; margin-bottom: 6px; }
+    .section-card p.hint { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    .add-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .add-row input {
+      flex: 1; min-width: 140px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 13px; outline: none;
+    }
+    .add-row input:focus { border-color: var(--accent); }
+    .user-list { list-style: none; }
+    .user-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-radius: 6px; font-size: 13px;
+    }
+    .user-item:nth-child(odd) { background: rgba(255,255,255,.03); }
+    .user-item-name { font-weight: 600; }
+    .user-item-actions { display: flex; gap: 8px; }
+    .empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
+
+    /* ── Toast ── */
+    .toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 18px; font-size: 13px; opacity: 0;
+      transform: translateY(10px); transition: opacity .25s, transform .25s;
+    }
+    .toast.show { opacity: 1; transform: none; }
+    .toast.t-error { border-color: var(--error); color: var(--error); }
+    .toast.t-success { border-color: var(--success); color: var(--success); }
+
+    /* ── Change-password modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 28px; width: 100%; max-width: 360px;
+    }
+    .modal h3 { font-size: 15px; margin-bottom: 4px; }
+    .modal p.sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-ghost:hover { background: rgba(255,255,255,.05); }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Admin Dashboard</h1>
-    </header>
-    <main>
-        <section id="login-form">
-            <h2>Login</h2>
-            <form action="/login" method="post">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                <button type="submit">Login</button>
-            </form>
-        </section>
-        <section id="admin-content">
-            <h2>Admin Content</h2>
-            <p>Welcome, admin! Here you can manage the application.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Your Company</p>
-    </footer>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Ceris-1-2 <span style="color:var(--accent)">Admin</span></h1>
+    <p class="sub">Sign in to manage users</p>
+    <div class="err-msg" id="login-err"></div>
+    <form id="login-form">
+      <div class="fg">
+        <label for="l-user">Username</label>
+        <input type="text" id="l-user" autocomplete="username" required placeholder="admin" />
+      </div>
+      <div class="fg">
+        <label for="l-pw">Password</label>
+        <input type="password" id="l-pw" autocomplete="current-password" required placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary btn-full" type="submit">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-brand">Ceris-1-2 <span>Registry</span></div>
+    <div class="topbar-right">
+      <span id="tb-user"></span>
+      <span class="badge">Admin</span>
+      <button class="btn btn-sm btn-ghost" id="btn-logout">Sign out</button>
+    </div>
+  </div>
+  <div class="main-content">
+
+    <!-- General users -->
+    <div class="section-card">
+      <h2>General Users</h2>
+      <p class="hint">Add or remove general (non-admin) users.</p>
+      <div class="add-row">
+        <input type="text"     id="u-name" placeholder="username"   autocomplete="off" />
+        <input type="password" id="u-pw"   placeholder="password"   autocomplete="new-password" />
+        <button class="btn btn-primary" id="btn-add-user">Add User</button>
+      </div>
+      <ul class="user-list" id="list-users"></ul>
+    </div>
+
+    <!-- Admin users -->
+    <div class="section-card">
+      <h2>Admin Users</h2>
+      <p class="hint">Add or remove admin users. At least one admin must remain.</p>
+      <div class="add-row">
+        <input type="text"     id="a-name" placeholder="username"   autocomplete="off" />
+        <input type="password" id="a-pw"   placeholder="password"   autocomplete="new-password" />
+        <button class="btn btn-primary" id="btn-add-admin">Add Admin</button>
+      </div>
+      <ul class="user-list" id="list-admins"></ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- Change-password modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Change Password</h3>
+    <p class="sub" id="modal-sub"></p>
+    <div class="fg">
+      <label>New password</label>
+      <input type="password" id="modal-np" placeholder="••••••••" autocomplete="new-password" />
+    </div>
+    <div class="fg">
+      <label>Confirm password</label>
+      <input type="password" id="modal-cp" placeholder="••••••••" autocomplete="new-password" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="btn-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+  /* ── Storage ───────────────────────────────────────────── */
+  const STORE  = 'ceris_users_v1';
+  const SESS   = 'ceris_admin_sess';
+
+  function loadUsers() {
+    try {
+      const raw = localStorage.getItem(STORE);
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    // Default seed – one admin
+    const seed = [{ username: 'admin', password: 'Ceris@2026', role: 'admin' }];
+    localStorage.setItem(STORE, JSON.stringify(seed));
+    return seed;
+  }
+  function saveUsers(list) { localStorage.setItem(STORE, JSON.stringify(list)); }
+  function byRole(role)    { return loadUsers().filter(u => u.role === role); }
+
+  /* ── Auth ──────────────────────────────────────────────── */
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const u   = document.getElementById('l-user').value.trim();
+    const p   = document.getElementById('l-pw').value;
+    const err = document.getElementById('login-err');
+    const match = loadUsers().find(x => x.username === u && x.password === p && x.role === 'admin');
+    if (!match) { err.textContent = 'Invalid credentials or insufficient permissions.'; return; }
+    err.textContent = '';
+    sessionStorage.setItem(SESS, u);
+    document.getElementById('l-pw').value = '';
+    showDashboard(u);
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', function() {
+    sessionStorage.removeItem(SESS);
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  });
+
+  function showDashboard(username) {
+    document.getElementById('login-screen').style.display  = 'none';
+    document.getElementById('dashboard').style.display     = 'block';
+    document.getElementById('tb-user').textContent         = username;
+    renderAll();
+  }
+
+  /* ── Render ────────────────────────────────────────────── */
+  function renderAll() { renderList('user'); renderList('admin'); }
+
+  function renderList(role) {
+    const listId = role === 'admin' ? 'list-admins' : 'list-users';
+    const ul = document.getElementById(listId);
+    ul.innerHTML = '';
+    const items = byRole(role);
+    if (!items.length) {
+      ul.innerHTML = '<li class="empty">No ' + (role === 'admin' ? 'admin' : 'general') + ' users yet.</li>';
+      return;
+    }
+    const me = sessionStorage.getItem(SESS);
+    items.forEach(function(u) {
+      const li = document.createElement('li');
+      li.className = 'user-item';
+      const isLastAdmin = role === 'admin' && byRole('admin').length <= 1;
+      const isSelf = u.username === me;
+      li.innerHTML =
+        '<span class="user-item-name">' + escHtml(u.username) + '</span>' +
+        '<span class="user-item-actions">' +
+          '<button class="btn btn-sm btn-ghost" data-action="chpw" data-user="' + escHtml(u.username) + '" data-role="' + role + '">Change pw</button>' +
+          '<button class="btn btn-sm btn-danger" data-action="remove" data-user="' + escHtml(u.username) + '" data-role="' + role + '"' +
+            ((isLastAdmin || isSelf) ? ' disabled title="' + (isLastAdmin ? 'Last admin cannot be removed' : 'Cannot remove yourself') + '"' : '') +
+          '>Remove</button>' +
+        '</span>';
+      ul.appendChild(li);
+    });
+  }
+
+  /* ── Add user ──────────────────────────────────────────── */
+  document.getElementById('btn-add-user').addEventListener('click',  function() { addUser('user'); });
+  document.getElementById('btn-add-admin').addEventListener('click', function() { addUser('admin'); });
+
+  function addUser(role) {
+    const uEl = document.getElementById(role === 'admin' ? 'a-name' : 'u-name');
+    const pEl = document.getElementById(role === 'admin' ? 'a-pw'   : 'u-pw');
+    const username = uEl.value.trim();
+    const password = pEl.value;
+    if (!username) { toast('Username is required.', 'error'); return; }
+    if (!password) { toast('Password is required.', 'error'); return; }
+    const all = loadUsers();
+    if (all.find(x => x.username === username)) { toast('Username already exists.', 'error'); return; }
+    all.push({ username: username, password: password, role: role });
+    saveUsers(all);
+    uEl.value = ''; pEl.value = '';
+    renderAll();
+    toast((role === 'admin' ? 'Admin' : 'User') + ' "' + username + '" added.', 'success');
+  }
+
+  /* ── Remove / Change-pw (event delegation) ─────────────── */
+  document.getElementById('list-users').addEventListener('click',  handleListClick);
+  document.getElementById('list-admins').addEventListener('click', handleListClick);
+
+  function handleListClick(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn || btn.disabled) return;
+    const action = btn.dataset.action;
+    const username = btn.dataset.user;
+    const role = btn.dataset.role;
+    if (action === 'remove') removeUser(username, role);
+    if (action === 'chpw')  openModal(username);
+  }
+
+  function removeUser(username, role) {
+    if (role === 'admin' && byRole('admin').length <= 1) {
+      toast('Cannot remove the last admin.', 'error'); return;
+    }
+    const all = loadUsers().filter(u => u.username !== username);
+    saveUsers(all);
+    renderAll();
+    toast('"' + username + '" removed.', 'success');
+  }
+
+  /* ── Change-password modal ─────────────────────────────── */
+  let modalTarget = null;
+
+  function openModal(username) {
+    modalTarget = username;
+    document.getElementById('modal-sub').textContent = 'Set a new password for "' + username + '".';
+    document.getElementById('modal-np').value = '';
+    document.getElementById('modal-cp').value = '';
+    document.getElementById('modal').classList.add('open');
+  }
+
+  document.getElementById('btn-modal-cancel').addEventListener('click', function() {
+    document.getElementById('modal').classList.remove('open');
+  });
+
+  document.getElementById('btn-modal-save').addEventListener('click', function() {
+    const np = document.getElementById('modal-np').value;
+    const cp = document.getElementById('modal-cp').value;
+    if (!np) { toast('New password cannot be empty.', 'error'); return; }
+    if (np !== cp) { toast('Passwords do not match.', 'error'); return; }
+    const all = loadUsers();
+    const idx = all.findIndex(u => u.username === modalTarget);
+    if (idx !== -1) { all[idx].password = np; saveUsers(all); }
+    document.getElementById('modal').classList.remove('open');
+    toast('Password updated for "' + modalTarget + '".', 'success');
+  });
+
+  /* ── Helpers ───────────────────────────────────────────── */
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toast(msg, type) {
+    const wrap = document.getElementById('toasts');
+    const el = document.createElement('div');
+    el.className = 'toast t-' + type;
+    el.textContent = msg;
+    wrap.appendChild(el);
+    requestAnimationFrame(function() { el.classList.add('show'); });
+    setTimeout(function() {
+      el.classList.remove('show');
+      setTimeout(function() { el.remove(); }, 300);
+    }, 3200);
+  }
+
+  /* ── Auto-restore session ──────────────────────────────── */
+  (function() {
+    const user = sessionStorage.getItem(SESS);
+    if (user && loadUsers().find(u => u.username === user && u.role === 'admin')) {
+      showDashboard(user);
+    }
+  })();
+</script>
 </body>
 </html>
