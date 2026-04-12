@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <script>
+        function loadAllowedUsers() {
+            const users = JSON.parse(localStorage.getItem('ceris_allowed_users_v1')) || [{"username":"admin","password":"change-me"}];
+            return users;
+        }
+
+        function addUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const users = loadAllowedUsers();
+            users.push({username, password});
+            localStorage.setItem('ceris_allowed_users_v1', JSON.stringify(users));
+            renderUserList();
+        }
+
+        function removeUser(index) {
+            let users = loadAllowedUsers();
+            users.splice(index, 1);
+            localStorage.setItem('ceris_allowed_users_v1', JSON.stringify(users));
+            renderUserList();
+        }
+
+        function renderUserList() {
+            const users = loadAllowedUsers();
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach((user, index) => {
+                const li = document.createElement('li');
+                li.textContent = `Username: ${user.username} `;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.onclick = () => removeUser(index);
+                li.appendChild(removeBtn);
+                userList.appendChild(li);
+            });
+        }
+
+        window.onload = function() {
+            renderUserList();
+        };
+    </script>
+</head>
+<body>
+    <h1>Admin User Management</h1>
+    <label for="username">Username:</label>
+    <input type="text" id="username" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+    <button onclick="addUser()">Add User</button>
+    <h2>Allowed Users</h2>
+    <ul id="userList"></ul>
+    <p style="color:red;">*This is not secure. User data is stored in localStorage.*</p>
+</body>
+</html>
