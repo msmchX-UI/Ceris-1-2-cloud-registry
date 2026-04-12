@@ -25,7 +25,14 @@
     .login-card h1 { font-size: 20px; margin-bottom: 4px; }
     .login-card p.sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
     .err-msg { color: var(--error); font-size: 13px; margin-bottom: 12px; min-height: 18px; }
-    #google-signin-btn { display: flex; justify-content: center; margin-top: 8px; }
+    .login-field { margin-bottom: 14px; }
+    .login-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .login-field input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 9px 12px; color: var(--text); font-size: 14px; outline: none;
+    }
+    .login-field input:focus { border-color: var(--accent); }
+    .btn-login { width: 100%; margin-top: 6px; }
 
     /* ── Buttons ── */
     .btn {
@@ -93,9 +100,19 @@
 <div id="login-screen">
   <div class="login-card">
     <h1>Ceris-1-2 <span style="color:var(--accent)">Admin</span></h1>
-    <p class="sub">Sign in with your Google account to manage users</p>
+    <p class="sub">Sign in with your admin credentials to manage users</p>
     <div class="err-msg" id="login-err"></div>
-    <div id="google-signin-btn"></div>
+    <form id="login-form" autocomplete="on">
+      <div class="login-field">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" name="username" autocomplete="username" placeholder="admin" required />
+      </div>
+      <div class="login-field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-login" id="btn-signin">Sign in</button>
+    </form>
   </div>
 </div>
 
@@ -139,25 +156,19 @@
 <!-- Toast container -->
 <div class="toast-wrap" id="toasts"></div>
 
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client"></script>
 <script>
   /* ── Config ─────────────────────────────────────────────── */
-  // TODO: Replace the empty string below with your actual Google OAuth Client ID
-  // (looks like "xxxx.apps.googleusercontent.com"). Leave empty to see a setup error.
-  const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
-
-  const SHEETS_API   = 'https://script.google.com/macros/s/AKfycbxIq4SSUP9c24kU8KCcXLd0-3xZdM60ApRo55Q9AHiJUo7Aj57-XiKeUtmUJcXpbi6UIw/exec';
-  const LOGOUT_URL   = 'https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/';
+  const SHEETS_API = 'https://script.google.com/macros/s/AKfycbxIq4SSUP9c24kU8KCcXLd0-3xZdM60ApRo55Q9AHiJUo7Aj57-XiKeUtmUJcXpbi6UIw/exec';
+  const LOGOUT_URL = 'https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/';
 
   /* ── State ──────────────────────────────────────────────── */
-  var _idToken  = '';
-  var _email    = '';
+  var _token    = '';
+  var _username = '';
   var _allUsers = [];
 
   /* ── API helper ─────────────────────────────────────────── */
   function callApi(action, extra) {
-    var body = Object.assign({ action: action, id_token: _idToken }, extra || {});
+    var body = Object.assign({ action: action, token: _token }, extra || {});
     return fetch(SHEETS_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -171,47 +182,44 @@
     });
   }
 
-  /* ── Google Sign-In ─────────────────────────────────────── */
-  function initGoogleSignIn() {
-    var errEl = document.getElementById('login-err');
-    if (!GOOGLE_CLIENT_ID) {
-      errEl.textContent = 'Setup required: configure GOOGLE_CLIENT_ID with your OAuth Client ID (e.g. xxxx.apps.googleusercontent.com).';
-      return;
-    }
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleCredential,
-      auto_select: false
-    });
-    google.accounts.id.renderButton(
-      document.getElementById('google-signin-btn'),
-      { theme: 'outline', size: 'large', width: 300, text: 'signin_with' }
-    );
-  }
-
-  function handleGoogleCredential(response) {
-    var errEl = document.getElementById('login-err');
+  /* ── Login form ─────────────────────────────────────────── */
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var errEl    = document.getElementById('login-err');
+    var btn      = document.getElementById('btn-signin');
+    var username = document.getElementById('login-username').value.trim();
+    var password = document.getElementById('login-password').value;
     errEl.textContent = '';
-    _idToken = response.credential;
-    callApi('whoami').then(function(data) {
-      if (!data.isAdmin) {
-        errEl.textContent = 'Access denied: ' + escHtml(data.email) + ' is not an admin.';
-        _idToken = '';
-        return;
-      }
-      _email = data.email;
-      showDashboard(_email);
+    if (!username || !password) { errEl.textContent = 'Username and password are required.'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    fetch(SHEETS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', username: username, password: password })
+    }).then(function(resp) {
+      return resp.json().catch(function() { return null; });
+    }).then(function(data) {
+      if (!data) throw new Error('Server returned an invalid (non-JSON) response.');
+      if (data.ok === false) throw new Error(data.error || 'Login failed');
+      if (data.role !== 'admin') throw new Error('Access denied: account is not an admin.');
+      sessionStorage.setItem('admin_token', data.token);
+      _token    = data.token;
+      _username = data.username;
+      showDashboard(_username);
     }).catch(function(err) {
-      errEl.textContent = 'Sign-in error: ' + err.message;
-      _idToken = '';
+      errEl.textContent = err.message;
+    }).then(function() {
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
     });
-  }
+  });
 
   /* ── Dashboard ──────────────────────────────────────────── */
-  function showDashboard(email) {
+  function showDashboard(username) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display    = 'block';
-    document.getElementById('tb-user').textContent        = email;
+    document.getElementById('tb-user').textContent        = username;
     loadAndRender();
   }
 
@@ -241,9 +249,12 @@
       var li = document.createElement('li');
       li.className = 'user-item';
       var isLastAdmin = role === 'admin' && admins.length <= 1;
-      var isSelf      = u.email === _email;
-      var disabledAttr = (isLastAdmin || isSelf)
-        ? ' disabled title="' + (isLastAdmin ? 'Last admin cannot be removed' : 'Cannot remove yourself') + '"'
+      // Note: the logged-in user is identified by username (admins sheet),
+      // while entries in this list are identified by email (users sheet).
+      // There is no reliable cross-identifier self-check here; last-admin
+      // protection covers the critical case.
+      var disabledAttr = isLastAdmin
+        ? ' disabled title="Last admin cannot be removed"'
         : '';
       li.innerHTML =
         '<span class="user-item-name">' + escHtml(u.email) + '</span>' +
@@ -291,9 +302,6 @@
     if (role === 'admin' && admins.length <= 1) {
       toast('Cannot remove the last admin.', 'error'); return;
     }
-    if (email === _email) {
-      toast('Cannot remove yourself.', 'error'); return;
-    }
     callApi('removeUser', { email: email }).then(function() {
       toast('"' + escHtml(email) + '" removed.', 'success');
       return loadAndRender();
@@ -304,11 +312,9 @@
 
   /* ── Logout ─────────────────────────────────────────────── */
   document.getElementById('btn-logout').addEventListener('click', function() {
-    if (typeof google !== 'undefined' && google.accounts) {
-      google.accounts.id.disableAutoSelect();
-    }
-    _idToken = '';
-    _email   = '';
+    sessionStorage.removeItem('admin_token');
+    _token    = '';
+    _username = '';
     _allUsers = [];
     window.location.href = LOGOUT_URL;
   });
@@ -332,7 +338,28 @@
   }
 
   /* ── Init ───────────────────────────────────────────────── */
-  initGoogleSignIn();
+  (function init() {
+    var saved = sessionStorage.getItem('admin_token');
+    if (!saved) return;
+    _token = saved;
+    fetch(SHEETS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'whoami', token: _token })
+    }).then(function(r) { return r.json().catch(function() { return null; }); })
+    .then(function(data) {
+      if (data && data.ok && data.isAdmin) {
+        _username = data.username;
+        showDashboard(_username);
+      } else {
+        sessionStorage.removeItem('admin_token');
+        _token = '';
+      }
+    }).catch(function() {
+      sessionStorage.removeItem('admin_token');
+      _token = '';
+    });
+  })();
 </script>
 </body>
 </html>
