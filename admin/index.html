@@ -24,26 +24,23 @@
     }
     .login-card h1 { font-size: 20px; margin-bottom: 4px; }
     .login-card p.sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
-    .fg { margin-bottom: 16px; }
-    .fg label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
-    .fg input {
-      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-      padding: 9px 12px; color: var(--text); font-size: 14px; outline: none;
-    }
-    .fg input:focus { border-color: var(--accent); }
+    .err-msg { color: var(--error); font-size: 13px; margin-bottom: 12px; min-height: 18px; }
+    #google-signin-btn { display: flex; justify-content: center; margin-top: 8px; }
+
+    /* ── Buttons ── */
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
       padding: 9px 18px; border-radius: 6px; font-size: 14px; font-weight: 600;
       cursor: pointer; border: none; transition: background .15s;
     }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-full { width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
     .btn-sm { padding: 5px 12px; font-size: 12px; }
     .btn-danger { background: #3b1f1f; color: var(--error); }
-    .btn-danger:hover { background: #5a2121; }
-    .err-msg { color: var(--error); font-size: 13px; margin-bottom: 12px; min-height: 18px; }
+    .btn-danger:hover:not(:disabled) { background: #5a2121; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,.05); }
 
     /* ── Dashboard ── */
     #dashboard { display: none; }
@@ -64,7 +61,7 @@
     .section-card p.hint { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
     .add-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     .add-row input {
-      flex: 1; min-width: 140px; background: var(--bg); border: 1px solid var(--border);
+      flex: 1; min-width: 200px; background: var(--bg); border: 1px solid var(--border);
       border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 13px; outline: none;
     }
     .add-row input:focus { border-color: var(--accent); }
@@ -88,22 +85,6 @@
     .toast.show { opacity: 1; transform: none; }
     .toast.t-error { border-color: var(--error); color: var(--error); }
     .toast.t-success { border-color: var(--success); color: var(--success); }
-
-    /* ── Change-password modal ── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.6); align-items: center; justify-content: center; z-index: 100;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      padding: 28px; width: 100%; max-width: 360px;
-    }
-    .modal h3 { font-size: 15px; margin-bottom: 4px; }
-    .modal p.sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .btn-ghost:hover { background: rgba(255,255,255,.05); }
   </style>
 </head>
 <body>
@@ -112,19 +93,9 @@
 <div id="login-screen">
   <div class="login-card">
     <h1>Ceris-1-2 <span style="color:var(--accent)">Admin</span></h1>
-    <p class="sub">Sign in to manage users</p>
+    <p class="sub">Sign in with your Google account to manage users</p>
     <div class="err-msg" id="login-err"></div>
-    <form id="login-form">
-      <div class="fg">
-        <label for="l-user">Username</label>
-        <input type="text" id="l-user" autocomplete="username" required placeholder="admin" />
-      </div>
-      <div class="fg">
-        <label for="l-pw">Password</label>
-        <input type="password" id="l-pw" autocomplete="current-password" required placeholder="••••••••" />
-      </div>
-      <button class="btn btn-primary btn-full" type="submit">Sign In</button>
-    </form>
+    <div id="google-signin-btn"></div>
   </div>
 </div>
 
@@ -145,8 +116,7 @@
       <h2>General Users</h2>
       <p class="hint">Add or remove general (non-admin) users.</p>
       <div class="add-row">
-        <input type="text"     id="u-name" placeholder="username"   autocomplete="off" />
-        <input type="password" id="u-pw"   placeholder="password"   autocomplete="new-password" />
+        <input type="email" id="u-email" placeholder="user@example.com" autocomplete="off" />
         <button class="btn btn-primary" id="btn-add-user">Add User</button>
       </div>
       <ul class="user-list" id="list-users"></ul>
@@ -157,8 +127,7 @@
       <h2>Admin Users</h2>
       <p class="hint">Add or remove admin users. At least one admin must remain.</p>
       <div class="add-row">
-        <input type="text"     id="a-name" placeholder="username"   autocomplete="off" />
-        <input type="password" id="a-pw"   placeholder="password"   autocomplete="new-password" />
+        <input type="email" id="a-email" placeholder="admin@example.com" autocomplete="off" />
         <button class="btn btn-primary" id="btn-add-admin">Add Admin</button>
       </div>
       <ul class="user-list" id="list-admins"></ul>
@@ -167,189 +136,191 @@
   </div>
 </div>
 
-<!-- Change-password modal -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <h3>Change Password</h3>
-    <p class="sub" id="modal-sub"></p>
-    <div class="fg">
-      <label>New password</label>
-      <input type="password" id="modal-np" placeholder="••••••••" autocomplete="new-password" />
-    </div>
-    <div class="fg">
-      <label>Confirm password</label>
-      <input type="password" id="modal-cp" placeholder="••••••••" autocomplete="new-password" />
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="btn-modal-cancel">Cancel</button>
-      <button class="btn btn-primary" id="btn-modal-save">Save</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast container -->
 <div class="toast-wrap" id="toasts"></div>
 
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client"></script>
 <script>
-  /* ── Storage ───────────────────────────────────────────── */
-  const STORE  = 'ceris_users_v1';
-  const SESS   = 'ceris_admin_sess';
+  /* ── Config ─────────────────────────────────────────────── */
+  // TODO: Replace the empty string below with your actual Google OAuth Client ID
+  // (looks like "xxxx.apps.googleusercontent.com"). Leave empty to see a setup error.
+  const GOOGLE_CLIENT_ID = '';
 
-  // NEW: Google Apps Script Web App endpoint (Sheets backend)
-  const SHEETS_API = "https://script.google.com/macros/s/AKfycbxIq4SSUP9c24kU8KCcXLd0-3xZdM60ApRo55Q9AHiJUo7Aj57-XiKeUtmUJcXpbi6UIw/exec";
-  
-  function loadUsers() {
-    try {
-      const raw = localStorage.getItem(STORE);
-      if (raw) return JSON.parse(raw);
-    } catch (_) {}
-    // Default seed – one admin
-    const seed = [{ username: 'admin', password: 'Ceris@2026', role: 'admin' }];
-    localStorage.setItem(STORE, JSON.stringify(seed));
-    return seed;
-  }
-  function saveUsers(list) { localStorage.setItem(STORE, JSON.stringify(list)); }
-  function byRole(role)    { return loadUsers().filter(u => u.role === role); }
+  const SHEETS_API   = 'https://script.google.com/macros/s/AKfycbxIq4SSUP9c24kU8KCcXLd0-3xZdM60ApRo55Q9AHiJUo7Aj57-XiKeUtmUJcXpbi6UIw/exec';
+  const LOGOUT_URL   = 'https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/';
 
-  /* ── Auth ──────────────────────────────────────────────── */
-  document.getElementById('login-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const u   = document.getElementById('l-user').value.trim();
-    const p   = document.getElementById('l-pw').value;
-    const err = document.getElementById('login-err');
-    const match = loadUsers().find(x => x.username === u && x.password === p && x.role === 'admin');
-    if (!match) { err.textContent = 'Invalid credentials or insufficient permissions.'; return; }
-    err.textContent = '';
-    sessionStorage.setItem(SESS, u);
-    document.getElementById('l-pw').value = '';
-    showDashboard(u);
-  });
+  /* ── State ──────────────────────────────────────────────── */
+  var _idToken  = '';
+  var _email    = '';
+  var _allUsers = [];
 
-  document.getElementById('btn-logout').addEventListener('click', function() {
-    sessionStorage.removeItem(SESS);
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-
-    // Redirect to site root after logout
-    window.location.href = 'https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/' ;
-  });
-
-  function showDashboard(username) {
-    document.getElementById('login-screen').style.display  = 'none';
-    document.getElementById('dashboard').style.display     = 'block';
-    document.getElementById('tb-user').textContent         = username;
-    renderAll();
+  /* ── API helper ─────────────────────────────────────────── */
+  function callApi(action, extra) {
+    var body = Object.assign({ action: action, id_token: _idToken }, extra || {});
+    return fetch(SHEETS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function(resp) {
+      return resp.json().catch(function() { return null; });
+    }).then(function(data) {
+      if (!data) throw new Error('Server returned an invalid (non-JSON) response.');
+      if (data.ok === false) throw new Error(data.error || 'API error');
+      return data;
+    });
   }
 
-  /* ── Render ────────────────────────────────────────────── */
+  /* ── Google Sign-In ─────────────────────────────────────── */
+  function initGoogleSignIn() {
+    var errEl = document.getElementById('login-err');
+    if (!GOOGLE_CLIENT_ID) {
+      errEl.textContent = 'Setup required: configure GOOGLE_CLIENT_ID with your OAuth Client ID (e.g. xxxx.apps.googleusercontent.com).';
+      return;
+    }
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      auto_select: false
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('google-signin-btn'),
+      { theme: 'outline', size: 'large', width: 300, text: 'signin_with' }
+    );
+  }
+
+  function handleGoogleCredential(response) {
+    var errEl = document.getElementById('login-err');
+    errEl.textContent = '';
+    _idToken = response.credential;
+    callApi('whoami').then(function(data) {
+      if (!data.isAdmin) {
+        errEl.textContent = 'Access denied: ' + escHtml(data.email) + ' is not an admin.';
+        _idToken = '';
+        return;
+      }
+      _email = data.email;
+      showDashboard(_email);
+    }).catch(function(err) {
+      errEl.textContent = 'Sign-in error: ' + err.message;
+      _idToken = '';
+    });
+  }
+
+  /* ── Dashboard ──────────────────────────────────────────── */
+  function showDashboard(email) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display    = 'block';
+    document.getElementById('tb-user').textContent        = email;
+    loadAndRender();
+  }
+
+  function loadAndRender() {
+    callApi('listUsers').then(function(data) {
+      _allUsers = Array.isArray(data.users) ? data.users : [];
+      renderAll();
+    }).catch(function(err) {
+      toast('Failed to load users: ' + err.message, 'error');
+    });
+  }
+
+  /* ── Render ─────────────────────────────────────────────── */
   function renderAll() { renderList('user'); renderList('admin'); }
 
   function renderList(role) {
-    const listId = role === 'admin' ? 'list-admins' : 'list-users';
-    const ul = document.getElementById(listId);
+    var listId = role === 'admin' ? 'list-admins' : 'list-users';
+    var ul = document.getElementById(listId);
     ul.innerHTML = '';
-    const items = byRole(role);
+    var items  = _allUsers.filter(function(u) { return u.role === role; });
+    var admins = _allUsers.filter(function(u) { return u.role === 'admin'; });
     if (!items.length) {
       ul.innerHTML = '<li class="empty">No ' + (role === 'admin' ? 'admin' : 'general') + ' users yet.</li>';
       return;
     }
-    const me = sessionStorage.getItem(SESS);
     items.forEach(function(u) {
-      const li = document.createElement('li');
+      var li = document.createElement('li');
       li.className = 'user-item';
-      const isLastAdmin = role === 'admin' && byRole('admin').length <= 1;
-      const isSelf = u.username === me;
+      var isLastAdmin = role === 'admin' && admins.length <= 1;
+      var isSelf      = u.email === _email;
+      var disabledAttr = (isLastAdmin || isSelf)
+        ? ' disabled title="' + (isLastAdmin ? 'Last admin cannot be removed' : 'Cannot remove yourself') + '"'
+        : '';
       li.innerHTML =
-        '<span class="user-item-name">' + escHtml(u.username) + '</span>' +
+        '<span class="user-item-name">' + escHtml(u.email) + '</span>' +
         '<span class="user-item-actions">' +
-          '<button class="btn btn-sm btn-ghost" data-action="chpw" data-user="' + escHtml(u.username) + '" data-role="' + role + '">Change pw</button>' +
-          '<button class="btn btn-sm btn-danger" data-action="remove" data-user="' + escHtml(u.username) + '" data-role="' + role + '"' +
-            ((isLastAdmin || isSelf) ? ' disabled title="' + (isLastAdmin ? 'Last admin cannot be removed' : 'Cannot remove yourself') + '"' : '') +
-          '>Remove</button>' +
+          '<button class="btn btn-sm btn-danger" data-action="remove" data-email="' + escHtml(u.email) + '" data-role="' + role + '"' +
+            disabledAttr + '>Remove</button>' +
         '</span>';
       ul.appendChild(li);
     });
   }
 
-  /* ── Add user ──────────────────────────────────────────── */
+  /* ── Add user ───────────────────────────────────────────── */
   document.getElementById('btn-add-user').addEventListener('click',  function() { addUser('user'); });
   document.getElementById('btn-add-admin').addEventListener('click', function() { addUser('admin'); });
 
   function addUser(role) {
-    const uEl = document.getElementById(role === 'admin' ? 'a-name' : 'u-name');
-    const pEl = document.getElementById(role === 'admin' ? 'a-pw'   : 'u-pw');
-    const username = uEl.value.trim();
-    const password = pEl.value;
-    if (!username) { toast('Username is required.', 'error'); return; }
-    if (!password) { toast('Password is required.', 'error'); return; }
-    const all = loadUsers();
-    if (all.find(x => x.username === username)) { toast('Username already exists.', 'error'); return; }
-    all.push({ username: username, password: password, role: role });
-    saveUsers(all);
-    uEl.value = ''; pEl.value = '';
-    renderAll();
-    toast((role === 'admin' ? 'Admin' : 'User') + ' "' + username + '" added.', 'success');
+    var inputId = role === 'admin' ? 'a-email' : 'u-email';
+    var email   = document.getElementById(inputId).value.trim().toLowerCase();
+    var btn     = document.getElementById(role === 'admin' ? 'btn-add-admin' : 'btn-add-user');
+    if (!email) { toast('Email is required.', 'error'); return; }
+    btn.disabled = true;
+    callApi('upsertUser', { email: email, role: role }).then(function() {
+      document.getElementById(inputId).value = '';
+      toast((role === 'admin' ? 'Admin' : 'User') + ' "' + escHtml(email) + '" added.', 'success');
+      return loadAndRender();
+    }).catch(function(err) {
+      toast('Error adding ' + role + ': ' + err.message, 'error');
+    }).then(function() {
+      btn.disabled = false;
+    });
   }
 
-  /* ── Remove / Change-pw (event delegation) ─────────────── */
+  /* ── Remove (event delegation) ──────────────────────────── */
   document.getElementById('list-users').addEventListener('click',  handleListClick);
   document.getElementById('list-admins').addEventListener('click', handleListClick);
 
   function handleListClick(e) {
-    const btn = e.target.closest('[data-action]');
+    var btn = e.target.closest('[data-action]');
     if (!btn || btn.disabled) return;
-    const action = btn.dataset.action;
-    const username = btn.dataset.user;
-    const role = btn.dataset.role;
-    if (action === 'remove') removeUser(username, role);
-    if (action === 'chpw')  openModal(username);
+    if (btn.dataset.action === 'remove') removeUser(btn.dataset.email, btn.dataset.role);
   }
 
-  function removeUser(username, role) {
-    if (role === 'admin' && byRole('admin').length <= 1) {
+  function removeUser(email, role) {
+    var admins = _allUsers.filter(function(u) { return u.role === 'admin'; });
+    if (role === 'admin' && admins.length <= 1) {
       toast('Cannot remove the last admin.', 'error'); return;
     }
-    const all = loadUsers().filter(u => u.username !== username);
-    saveUsers(all);
-    renderAll();
-    toast('"' + username + '" removed.', 'success');
+    if (email === _email) {
+      toast('Cannot remove yourself.', 'error'); return;
+    }
+    callApi('removeUser', { email: email }).then(function() {
+      toast('"' + escHtml(email) + '" removed.', 'success');
+      return loadAndRender();
+    }).catch(function(err) {
+      toast('Error removing user: ' + err.message, 'error');
+    });
   }
 
-  /* ── Change-password modal ─────────────────────────────── */
-  let modalTarget = null;
-
-  function openModal(username) {
-    modalTarget = username;
-    document.getElementById('modal-sub').textContent = 'Set a new password for "' + username + '".';
-    document.getElementById('modal-np').value = '';
-    document.getElementById('modal-cp').value = '';
-    document.getElementById('modal').classList.add('open');
-  }
-
-  document.getElementById('btn-modal-cancel').addEventListener('click', function() {
-    document.getElementById('modal').classList.remove('open');
+  /* ── Logout ─────────────────────────────────────────────── */
+  document.getElementById('btn-logout').addEventListener('click', function() {
+    if (typeof google !== 'undefined' && google.accounts) {
+      google.accounts.id.disableAutoSelect();
+    }
+    _idToken = '';
+    _email   = '';
+    _allUsers = [];
+    window.location.href = LOGOUT_URL;
   });
 
-  document.getElementById('btn-modal-save').addEventListener('click', function() {
-    const np = document.getElementById('modal-np').value;
-    const cp = document.getElementById('modal-cp').value;
-    if (!np) { toast('New password cannot be empty.', 'error'); return; }
-    if (np !== cp) { toast('Passwords do not match.', 'error'); return; }
-    const all = loadUsers();
-    const idx = all.findIndex(u => u.username === modalTarget);
-    if (idx !== -1) { all[idx].password = np; saveUsers(all); }
-    document.getElementById('modal').classList.remove('open');
-    toast('Password updated for "' + modalTarget + '".', 'success');
-  });
-
-  /* ── Helpers ───────────────────────────────────────────── */
+  /* ── Helpers ────────────────────────────────────────────── */
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function toast(msg, type) {
-    const wrap = document.getElementById('toasts');
-    const el = document.createElement('div');
+    var wrap = document.getElementById('toasts');
+    var el   = document.createElement('div');
     el.className = 'toast t-' + type;
     el.textContent = msg;
     wrap.appendChild(el);
@@ -360,13 +331,8 @@
     }, 3200);
   }
 
-  /* ── Auto-restore session ──────────────────────────────── */
-  (function() {
-    const user = sessionStorage.getItem(SESS);
-    if (user && loadUsers().find(u => u.username === user && u.role === 'admin')) {
-      showDashboard(user);
-    }
-  })();
+  /* ── Init ───────────────────────────────────────────────── */
+  initGoogleSignIn();
 </script>
 </body>
 </html>
