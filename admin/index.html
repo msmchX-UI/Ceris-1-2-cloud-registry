@@ -3,16 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
-    <script>
-        function logout() {
-            localStorage.removeItem('ceris_admin_logged_in_user_v1');
-            window.location.href = '/Ceris-1-2-cloud-registry/';
-        }
-    </script>
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <button onclick="logout()">Logout</button>
-    <!-- Other content of admin/index.html -->
+    <header>
+        <h1>Admin Dashboard</h1>
+    </header>
+    <main>
+        <section id="login-form">
+            <h2>Login</h2>
+            <form action="/login" method="post">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+        <section id="admin-content">
+            <h2>Admin Content</h2>
+            <p>Welcome, admin! Here you can manage the application.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 Your Company</p>
+    </footer>
 </body>
 </html>
