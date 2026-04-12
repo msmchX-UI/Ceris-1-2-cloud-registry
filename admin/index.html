@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .warning { color: red; font-weight: bold; }
+        .passcode { display: none; }
+    </style>
+    <script>
+        function promptPasscode() {
+            const passcode = prompt('Enter passcode to access admin content:');
+            if (passcode === 'your_passcode_here') { // Replace with your actual passcode
+                document.getElementById('admin-content').style.display = 'block';
+                document.getElementById('passcode-prompt').style.display = 'none';
+            } else {
+                alert('Incorrect passcode!');
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <p class="warning">Warning: This admin page is not secure without server-side/edge authentication!</p>
+    <div id="passcode-prompt" class="passcode">
+        <button onclick="promptPasscode()">Enter Passcode</button>
+    </div>
+    <div id="admin-content" style="display: none;">
+        <h2>Protected Admin Content</h2>
+        <p>Welcome to the admin area!</p>
+        <!-- Admin content goes here -->
+    </div>
+</body>
+</html>
