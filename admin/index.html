@@ -226,6 +226,9 @@
     sessionStorage.removeItem(SESS);
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('login-screen').style.display = 'flex';
+
+    // Redirect to site root after logout
+    window.location.href = 'https://msmchx-ui.github.io/Ceris-1-2-cloud-registry/' ;
   });
 
   function showDashboard(username) {
