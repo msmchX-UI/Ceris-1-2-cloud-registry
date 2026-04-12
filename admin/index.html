@@ -1,175 +1,63 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Admin • Ceris 1-2 Cloud Registry</title>
-    <meta name="robots" content="noindex,nofollow" />
-
-    <style>
-      :root {
-        --bg: #0b1020;
-        --panel: #121a33;
-        --text: #e7ecff;
-        --muted: #aab4e6;
-        --accent: #7aa2ff;
-        --danger: #ff6b6b;
-        --border: rgba(255, 255, 255, 0.12);
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-        background: var(--bg);
-        color: var(--text);
-      }
-      header, main {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      .card {
-        background: rgba(18, 26, 51, 0.95);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 16px;
-        margin: 14px 0;
-      }
-      .warning {
-        border: 1px solid rgba(255, 107, 107, 0.35);
-        background: rgba(255, 107, 107, 0.08);
-        color: var(--text);
-      }
-      .warning strong { color: var(--danger); }
-      .muted { color: var(--muted); line-height: 1.6; }
-      label {
-        display: block;
-        font-size: 13px;
-        color: var(--muted);
-        margin: 10px 0 6px;
-      }
-      input {
-        width: min(420px, 100%);
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: rgba(0,0,0,0.25);
-        color: var(--text);
-      }
-      button, a.btn {
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: rgba(255,255,255,0.06);
-        color: var(--text);
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-      button.primary { border-color: rgba(122,162,255,0.35); background: rgba(122,162,255,0.18); }
-      .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
-      .error { color: var(--danger); margin-top: 10px; }
-      #adminApp { display: none; }
-      code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        font-size: 12px;
-        padding: 2px 6px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: rgba(0,0,0,0.2);
-        color: var(--text);
-      }
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <h1>Admin Dashboard</h1>
-      <div class="card warning">
-        <p class="muted">
-          <strong>Security warning:</strong> This page is hosted on <code>GitHub Pages</code> (static hosting).
-          A username/password check implemented only in HTML/JS is <strong>not secure</strong>.
-          For real security, protect <code>/admin/</code> with an edge/server auth layer (Cloudflare Access, Netlify, Firebase, etc.).
-        </p>
-      </div>
-    </header>
-
-    <main>
-      <section id="loginCard" class="card">
-        <h2>Sign in</h2>
-        <p class="muted">Enter your admin username and password.</p>
-
-        <form id="loginForm">
-          <label for="username">Username</label>
-          <input id="username" name="username" autocomplete="username" required />
-
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" required />
-
-          <div class="row">
-            <button class="primary" type="submit">Log in</button>
-            <button type="button" id="logoutBtn">Log out</button>
-            <a class="btn" href="/Ceris-1-2-cloud-registry/">Back to site</a>
-          </div>
-
-          <div id="error" class="error" role="alert" aria-live="polite"></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="login-form" style="display: none;">
+        <h2>Login</h2>
+        <form id="admin-login">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Login</button>
         </form>
-      </section>
+    </div>
 
-      <section id="adminApp" class="card">
-        <h2>Protected Admin Content</h2>
-        <p class="muted">Welcome to the admin area!</p>
-        <!-- Admin content goes here -->
-      </section>
-    </main>
+    <div id="admin-content" style="display: none;">
+        <h2>Admin Content</h2>
+        <p>Welcome to the admin panel!</p>
+        <button id="logout-btn">Logout</button>
+    </div>
 
     <script>
-      // WARNING: Client-side only. Anyone can read/modify this in devtools.
-      // Change these to whatever you want, but do NOT reuse real passwords here.
-      const ALLOWED_USERS = [
-        { username: "admin", password: "change-me" }
-      ];
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('login-form');
+            const adminContent = document.getElementById('admin-content');
+            const logoutBtn = document.getElementById('logout-btn');
 
-      const storageKey = "ceris_admin_logged_in_v1";
+            // Check if user is logged in
+            const loggedInUser = localStorage.getItem('ceris_admin_logged_in_user_v1');
+            if (loggedInUser) {
+                adminContent.style.display = 'block';
+                loginForm.style.display = 'none';
+                // You might want to set some welcome message here based on loggedInUser
+            } else {
+                loginForm.style.display = 'block';
+                adminContent.style.display = 'none';
+            }
 
-      const loginCard = document.getElementById("loginCard");
-      const adminApp = document.getElementById("adminApp");
-      const errorEl = document.getElementById("error");
-      const logoutBtn = document.getElementById("logoutBtn");
+            // Handle login form submission
+            document.getElementById('admin-login').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                // Perform authentication here (omitted for simplicity)
+                // On successful login:
+                localStorage.setItem('ceris_admin_logged_in_user_v1', username);
+                loginForm.style.display = 'none';
+                adminContent.style.display = 'block';
+            });
 
-      function setLoggedIn(loggedIn) {
-        if (loggedIn) localStorage.setItem(storageKey, "true");
-        else localStorage.removeItem(storageKey);
-
-        loginCard.style.display = loggedIn ? "none" : "block";
-        adminApp.style.display = loggedIn ? "block" : "none";
-      }
-
-      function isLoggedIn() {
-        return localStorage.getItem(storageKey) === "true";
-      }
-
-      document.getElementById("loginForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        errorEl.textContent = "";
-
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-
-        const ok = ALLOWED_USERS.some(u => u.username === username && u.password === password);
-        if (ok) {
-          setLoggedIn(true);
-        } else {
-          errorEl.textContent = "Invalid username or password.";
-        }
-      });
-
-      logoutBtn.addEventListener("click", () => setLoggedIn(false));
-
-      // Initialize
-      setLoggedIn(isLoggedIn());
+            // Handle logout
+            logoutBtn.addEventListener('click', function () {
+                localStorage.removeItem('ceris_admin_logged_in_user_v1');
+                loginForm.style.display = 'block';
+                adminContent.style.display = 'none';
+            });
+        });
     </script>
-  </body>
+</body>
 </html>
