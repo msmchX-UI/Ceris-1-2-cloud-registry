@@ -195,6 +195,9 @@
   const STORE  = 'ceris_users_v1';
   const SESS   = 'ceris_admin_sess';
 
+  // NEW: Google Apps Script Web App endpoint (Sheets backend)
+  const SHEETS_API = "https://script.google.com/macros/s/AKfycbxIq4SSUP9c24kU8KCcXLd0-3xZdM60ApRo55Q9AHiJUo7Aj57-XiKeUtmUJcXpbi6UIw/exec";
+  
   function loadUsers() {
     try {
       const raw = localStorage.getItem(STORE);
