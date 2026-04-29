@@ -1,0 +1,15 @@
+services:
+  registry:
+    image: registry:2
+    container_name: ceris-registry
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - registry-data:/var/lib/registry
+      - ./registry/config.yml:/etc/docker/registry/config.yml:ro
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+
+volumes:
+  registry-data:
